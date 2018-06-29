@@ -4,20 +4,19 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
-
 """
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -39,6 +38,7 @@ class SearchProblem:
 
         Returns True if and only if the state is a valid goal state.
         """
+
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -70,7 +70,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -87,17 +88,86 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    ''' state = [(x,y), action, cost]'''
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return []
+
+    myStack = util.Stack()
+    visited = set([start_state])
+
+    for succ in problem.getSuccessors(start_state):
+        state, action = succ[0], succ[1]
+        myStack.push((state, [action]))
+
+    while not myStack.isEmpty():
+        cur = myStack.pop()
+        cur_state, cur_action = cur[0], cur[1]
+
+        if problem.isGoalState(cur_state):
+            return cur_action
+
+        if cur_state not in visited:
+            visited.add(cur_state)
+            for succ in problem.getSuccessors(cur_state):
+                new_state, new_action = succ[0], succ[1]
+                myStack.push((new_state, cur_action + [new_action]))
+    return []
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return []
+    q = util.Queue()
+    visited = set([start_state])
+    for succ in problem.getSuccessors(start_state):
+        state, action = succ[0], succ[1]
+        q.push((state, [action]))
+    while not q.isEmpty():
+        cur = q.pop()
+        cur_state, cur_action = cur[0], cur[1]
+
+        if problem.isGoalState(cur_state):
+            return cur_action
+
+        if cur_state not in visited:
+            visited.add(cur_state)
+            for succ in problem.getSuccessors(cur_state):
+                new_state, new_action = succ[0], succ[1]
+                q.push((new_state, cur_action + [new_action]))
+    return []
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return []
+    q = util.PriorityQueue()
+    visited = set([start_state])
+    for succ in problem.getSuccessors(start_state):
+        state, action, cost = succ[0], succ[1], succ[2]
+        q.push((state, [action], cost), cost)
+
+    while not q.isEmpty():
+        cur = q.pop()
+        cur_state, cur_action, cur_cost = cur[0], cur[1], cur[2]
+
+        if problem.isGoalState(cur_state):
+            return cur_action
+
+        if cur_state not in visited:
+            visited.add(cur_state)
+            for succ in problem.getSuccessors(cur_state):
+                new_state, new_action, new_cost = succ[0], succ[1], succ[2]
+                q.push((new_state, cur_action + [new_action],
+                        cur_cost + new_cost), cur_cost + new_cost)
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +176,35 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    if problem.isGoalState(start_state):
+        return []
+    q = util.PriorityQueue()
+    visited = set([start_state])
+    for succ in problem.getSuccessors(start_state):
+        state, action, cost = succ[0], succ[1], succ[2]
+        priority = cost + heuristic(state, problem)
+        q.push((state, [action], cost), priority)
+
+    while not q.isEmpty():
+        cur = q.pop()
+        cur_state, cur_action, cur_cost = cur[0], cur[1], cur[2]
+
+        if problem.isGoalState(cur_state):
+            return cur_action
+
+        if cur_state not in visited:
+            visited.add(cur_state)
+            for succ in problem.getSuccessors(cur_state):
+                new_state, new_action, new_cost = succ[0], succ[1], succ[2]
+                priority = cur_cost + new_cost + heuristic(new_state, problem)
+                q.push((new_state, cur_action + [new_action],
+                        cur_cost + new_cost), priority)
+    return []
 
 
 # Abbreviations
